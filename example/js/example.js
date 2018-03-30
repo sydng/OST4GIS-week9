@@ -6,7 +6,7 @@ var crimeFilters;
 var hexGrid;
 var mappedGrid;
 
-var baseHexStyle = { stroke: false }
+var baseHexStyle = { stroke: false };
 
 /* =====================
   Map Setup
@@ -40,11 +40,16 @@ $.ajax('https://raw.githubusercontent.com/CPLN-692-401/datasets/master/geojson/p
   crimeData = turf.within(crimeData, spatialFilter);
 
   // Fit map to data bounds
+  //turf.envelope -- returns a GeoJSON of a polygon based on points; the bounding box
+  //used to make the hexGRID that fits only the area of interest
+  //can then specify size of the hexGrid
   var mapBoundary = L.geoJson(turf.envelope(crimeData)).getBounds();
   map.fitBounds(mapBoundary);
 
   // We'll place a hexagonal grid over the entire mapped area (hexagons are better than
   // squares because square east/west and north/south distance is less than diagonal distance
+  //turf.hexGRID returns a hexagonal grid over the area of interest
+  //note that this an old version of turf.hexGRID -- new version has diferent options for writing units
   var turfFriendlyBoundary = [mapBoundary.getWest(), mapBoundary.getSouth(), mapBoundary.getEast(), mapBoundary.getNorth()];
   hexGrid = turf.hexGrid(turfFriendlyBoundary, 0.15, 'miles');
 
@@ -53,10 +58,12 @@ $.ajax('https://raw.githubusercontent.com/CPLN-692-401/datasets/master/geojson/p
   var uniqueCrimeTypes = _.unique(_.map(crimeData.features, function(f) { return f.properties.text_general_code; }));
 
   // For each unique text, create a  checkbox
+  //dynamially generating HTMLcontent and the dynamic behavior of the checkboxes
   _.each(uniqueCrimeTypes, function(crimeText, index) {
     $('#checkboxes').append('<label><input type="checkbox" />' + crimeText + '</label></br>');
   });
 
+  //when the button on the application is clicked
   $('#doFilter').click(function() {
     // Here, we're using jQuery's `map` function; it works very much like underscore's
     // We want true if checked, false if not
@@ -100,4 +107,3 @@ $.ajax('https://raw.githubusercontent.com/CPLN-692-401/datasets/master/geojson/p
     }).addTo(map);
   });
 });
-

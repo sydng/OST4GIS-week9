@@ -117,6 +117,11 @@ Task 6 (stretch): See if you can refocus the map to roughly the bounding box of 
 
 
 ===================== */
+//my token: pk.eyJ1Ijoic3lkbmciLCJhIjoiY2pmY3JuM2x3M3poYjJ3bzFwZmV4ZHdwdCJ9.H7Kk8jKeATVVDR9qaVxU2Q
+var dataset;
+var coordinates;
+var routesURL;
+var routes;
 
 var state = {
   position: {
@@ -140,7 +145,7 @@ var updatePosition = function(lat, lng, updated) {
   if (state.position.marker) { map.removeLayer(state.position.marker); }
   state.position.marker = L.circleMarker([lat, lng], {color: "blue"});
   state.position.updated = updated;
-  state.position.marker.addTo(map);
+  state.position.marker.bindPopup("Latitude:" + lat.toString() + "  " + "Longitude:" + lng.toString()).addTo(map);
   goToOrigin(lat, lng);
 };
 
@@ -169,9 +174,28 @@ $(document).ready(function() {
   // click handler for the "calculate" button (probably you want to do something with this)
   $("#calculate").click(function(e) {
     var dest = $('#dest').val();
-    console.log(dest);
+    dataset = "https://api.mapbox.com/geocoding/v5/mapbox.places/{dest}.json?access_token=pk.eyJ1Ijoic3lkbmciLCJhIjoiY2pmY3JuM2x3M3poYjJ3bzFwZmV4ZHdwdCJ9.H7Kk8jKeATVVDR9qaVxU2Q";
+    $.ajax(dataset).done(function(newData) {
+      var step1 = newData.features;
+      var step2 = [];
+      _.each(step1, function(key) {
+        step2.push(key.geometry.coordinates);
+      });
+      coordinates = step2;
+      var coordinateMarkers;
+      _.each(coordinates, function(key) {
+        coordinateMarkers = L.circleMarker([key[1], key[0]], {color: "green"});
+        return coordinateMarkers;
+      });
+      coordinateMarkers.addTo(map);
+    });
+
+    routesURL = "https://api.mapbox.com/directions/v5/mapbox/cycling/-86.495,30.3935;-74.195,39.958?access_token=pk.eyJ1Ijoic3lkbmciLCJhIjoiY2pmY3JuM2x3M3poYjJ3bzFwZmV4ZHdwdCJ9.H7Kk8jKeATVVDR9qaVxU2Q";
+    $.ajax(routesURL).done(function(nextSteps) {
+      var parsing = nextSteps.routes;
+      routes = L.geoJSON(parsing);
+      routes.addTo(map);
+      //console.log(routes);
+    });
   });
-
 });
-
-
