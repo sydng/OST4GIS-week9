@@ -188,14 +188,23 @@ $(document).ready(function() {
         return coordinateMarkers;
       });
       coordinateMarkers.addTo(map);
-    });
-
-    routesURL = "https://api.mapbox.com/directions/v5/mapbox/cycling/-86.495,30.3935;-74.195,39.958?access_token=pk.eyJ1Ijoic3lkbmciLCJhIjoiY2pmY3JuM2x3M3poYjJ3bzFwZmV4ZHdwdCJ9.H7Kk8jKeATVVDR9qaVxU2Q";
-    $.ajax(routesURL).done(function(nextSteps) {
-      var parsing = nextSteps.routes;
-      routes = L.geoJSON(parsing);
-      routes.addTo(map);
-      //console.log(routes);
+      routesURL = "https://api.mapbox.com/directions/v5/mapbox/cycling/" +
+          coordinates[0][0] + "," + coordinates[0][1] +
+          ";-74.195,39.958?access_token=pk.eyJ1Ijoic3lkbmciLCJhIjoiY2pmY3JuM2x3M3poYjJ3bzFwZmV4ZHdwdCJ9.H7Kk8jKeATVVDR9qaVxU2Q";
+      console.log(routesURL);
+      $.ajax(routesURL).done(function(nextSteps) {
+      var routes = nextSteps.routes[0].geometry;
+      console.log(routes);
+      var decoded = _.map(decode(routes), function(point) {
+        return [point[1], point[0]];
+      });
+      var lineString = turf.lineString(decoded, {name: 'line 1'});
+      console.log(lineString);
+      L.geoJSON(lineString, {
+        color: "black"
+      }).addTo(map);
+      //console.log(path);
+      });
     });
   });
 });
